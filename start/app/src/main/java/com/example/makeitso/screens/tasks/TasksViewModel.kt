@@ -17,6 +17,7 @@ limitations under the License.
 package com.example.makeitso.screens.tasks
 
 import androidx.compose.runtime.mutableStateOf
+import androidx.lifecycle.viewModelScope
 import com.example.makeitso.EDIT_TASK_SCREEN
 import com.example.makeitso.SETTINGS_SCREEN
 import com.example.makeitso.TASK_ID
@@ -26,7 +27,10 @@ import com.example.makeitso.model.service.LogService
 import com.example.makeitso.model.service.StorageService
 import com.example.makeitso.screens.MakeItSoViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.stateIn
 import javax.inject.Inject
 
 @HiltViewModel
@@ -37,10 +41,15 @@ class TasksViewModel @Inject constructor(
 ) : MakeItSoViewModel(logService) {
   val options = mutableStateOf<List<String>>(listOf())
 
-  val tasks = emptyFlow<List<Task>>()
+  val tasks: StateFlow<List<Task>> = storageService.tasks
+    .stateIn(
+      scope = viewModelScope,
+      started = SharingStarted.WhileSubscribed(5000),
+      initialValue = emptyList()
+    )
 
   fun loadTaskOptions() {
-    //TODO
+
   }
 
   fun onTaskCheckChange(task: Task) {
